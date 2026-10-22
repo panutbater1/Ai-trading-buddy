@@ -279,7 +279,15 @@ $('#chatForm').addEventListener('submit', async e => {
 $('#chatInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#chatForm').requestSubmit(); } });
 
 /* ---------- settings ---------- */
-$('#key').addEventListener('change', () => chrome.storage.local.set({ apiKey: $('#key').value.trim() }, () => toast('API key saved.')));
+$('#key').addEventListener('change', () => {
+  const k = $('#key').value.replace(/\s+/g, '');
+  $('#key').value = k;
+  if (k && !k.startsWith('sk-ant-')) {
+    toast("That doesn't look like an Anthropic key. Anthropic keys start with sk-ant-. Finnhub and GitHub keys won't work here.");
+    return;
+  }
+  chrome.storage.local.set({ apiKey: k }, () => toast(k ? 'API key saved.' : 'API key removed.'));
+});
 let resetArmed = false;
 $('#resetBtn').onclick = async () => {
   if (!resetArmed) { resetArmed = true; $('#resetBtn').textContent = 'Click again to erase all progress'; $('#resetNote').textContent = 'This clears your steps, journal and plan.'; return; }

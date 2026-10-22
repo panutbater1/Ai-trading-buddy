@@ -7,6 +7,20 @@ chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(consol
 const SYSTEM = `You are Pip, a friendly trading coach for complete beginners. You only teach: explain what parts of a trading platform are and how they work.
 Never recommend buying or selling any specific security, never predict prices, and never tell the user to place a trade. Use plain words, short sentences, and define any jargon.`;
 
+// Turn API errors into something a beginner can act on.
+function friendlyError(status, body) {
+  const messages = {
+    400: /credit balance/i.test(body)
+      ? 'Your Anthropic account is out of credit. Add credit under Billing at console.anthropic.com, then try again.'
+      : "Claude couldn't understand that request. Try again, or reload the page.",
+    401: "Your Anthropic API key isn't working. In the Pip side panel, open Settings and paste a fresh key from console.anthropic.com. It should start with sk-ant-.",
+    403: "Your Anthropic API key doesn't have permission for this. Check the key in console.anthropic.com.",
+    429: "Pip is getting too many requests right now. Wait a minute and try again.",
+    529: 'Claude is very busy right now. Try again in a minute.',
+  };
+  return messages[status] || (status >= 500 ? 'Claude is having trouble right now. Try again in a minute.' : `Something went wrong (error ${status}). Try again.`);
+}
+
 async function getKey() {
   const { apiKey } = await chrome.storage.local.get('apiKey');
   if (!apiKey) throw new Error('Add your Anthropic API key in the Settings tab of the Pip side panel first.');
@@ -28,7 +42,7 @@ async function claudeChat(apiKey, messages, maxTokens, system = SYSTEM) {
     },
     body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system, messages }),
   });
-  if (!res.ok) throw new Error(`Claude API error ${res.status}: ${await res.text()}`);
+  if (!res.ok) throw new Error(friendlyError(res.status, await res.text()));
   const data = await res.json();
   return data.content.filter(b => b.type === 'text').map(b => b.text).join('');
 }
