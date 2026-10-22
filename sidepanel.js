@@ -5,7 +5,7 @@ const money = n => (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', { 
 
 /* ---------- saved state ---------- */
 const DEFAULT = { tasks: {}, journal: [], plan: {}, golive: [], quizPassed: false, sizerUsed: false, sizer: { account: 5000, pct: 1, entry: '', stop: '' } };
-let S = structuredClone(DEFAULT), tourDone = false, view = { lesson: null }, chat = [];
+let S = structuredClone(DEFAULT), tourDone = false, view = { lesson: null }, chat = [], lastQuote = null;
 
 const save = () => chrome.storage.local.set({ pip: S });
 async function load() {
@@ -270,7 +270,8 @@ $('#chatForm').addEventListener('submit', async e => {
   const res = await chrome.runtime.sendMessage({
     type: 'pip:chat', withScreen: $('#withScreen').checked,
     messages: chat.filter(m => !m.wait).map(({ role, content }) => ({ role, content })),
-    context: nx ? `The user is on stage "${nx.stage.title}", working on the step "${nx.title}". They have logged ${S.journal.length} paper trades.` : 'The user has finished the beginner guide.',
+    context: (nx ? `The user is on stage "${nx.stage.title}", working on the step "${nx.title}". They have logged ${S.journal.length} paper trades.` : 'The user has finished the beginner guide.')
+      + (lastQuote ? `\nThey just looked up this quote: ${JSON.stringify(lastQuote)}. Explain what the numbers mean if asked, but never say whether to buy or sell.` : ''),
   });
   chat.pop();
   chat.push({ role: 'assistant', content: res?.ok ? res.result : `I couldn't answer that: ${res?.error || 'unknown error'}` });
@@ -278,7 +279,33 @@ $('#chatForm').addEventListener('submit', async e => {
 });
 $('#chatInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#chatForm').requestSubmit(); } });
 
+/* ---------- quotes (Finnhub, via the local backend) ---------- */
+$('#quoteForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const symbol = $('#quoteSymbol').value.trim().toUpperCase(); if (!symbol) return;
+  $('#quoteOut').innerHTML = '<p class="muted">Looking up…</p>';
+  const res = await chrome.runtime.sendMessage({ type: 'pip:quote', symbol });
+  if (!res?.ok) { lastQuote = null; $('#quoteOut').innerHTML = `<p class="warn">${esc(res?.error || 'Could not get a quote.')}</p>`; return; }
+  const q = lastQuote = res.result;
+  const dir = q.change > 0 ? 'up' : q.change < 0 ? 'down' : '';
+  const sign = q.change > 0 ? '+' : '';
+  $('#quoteOut').innerHTML = `<div class="result">
+    <span class="muted">${esc(q.symbol)} · ${new Date(q.time * 1000).toLocaleString()}</span>
+    <strong>${money(q.price)} <span class="chg ${dir}">${sign}${q.change.toFixed(2)} (${sign}${q.changePct.toFixed(2)}%)</span></strong>
+    <span class="muted">Open ${money(q.open)} · High ${money(q.high)} · Low ${money(q.low)} · Prev close ${money(q.prevClose)}</span>
+  </div>
+  <p class="muted">Not sure what these mean? Ask Pip below.</p>`;
+});
+
 /* ---------- settings ---------- */
+async function checkBackend() {
+  $('#backendStatus').textContent = 'Checking…';
+  const res = await chrome.runtime.sendMessage({ type: 'pip:health' });
+  $('#backendStatus').textContent = !res?.ok ? res?.error || 'Backend not reachable.'
+    : `Running. Finnhub key: ${res.result.finnhub ? 'set' : 'missing'}. Anthropic key: ${res.result.claude ? 'set' : 'missing (using the key below)'}.`;
+}
+$('#backendCheck').onclick = checkBackend;
+document.querySelector('[data-tab="settings"]').addEventListener('click', checkBackend);
 $('#key').addEventListener('change', () => chrome.storage.local.set({ apiKey: $('#key').value.trim() }, () => toast('API key saved.')));
 let resetArmed = false;
 $('#resetBtn').onclick = async () => {

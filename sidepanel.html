@@ -39,6 +39,14 @@
   <section id="guide" class="tab"></section>
 
   <section id="chat" class="tab" hidden>
+    <form id="quoteForm" class="box quote">
+      <h3>Look up a price</h3>
+      <div class="row">
+        <input id="quoteSymbol" placeholder="Ticker, like AAPL" autocomplete="off" spellcheck="false" aria-label="Ticker symbol">
+        <button class="btn" type="submit">Get quote</button>
+      </div>
+      <div id="quoteOut" aria-live="polite"></div>
+    </form>
     <div id="log" class="log" aria-live="polite"></div>
     <form id="chatForm" class="composer">
       <textarea id="chatInput" rows="2" placeholder="Ask anything, like &quot;What's a good first stock to practice with?&quot; or &quot;What does this red number mean?&quot;"></textarea>
@@ -50,9 +58,14 @@
   </section>
 
   <section id="settings" class="tab" hidden>
-    <label for="key">Anthropic API key</label>
+    <div class="box">
+      <h3>Local backend</h3>
+      <p id="backendStatus" class="muted">Checking…</p>
+      <button class="btn small" id="backendCheck" type="button">Check again</button>
+    </div>
+    <label for="key">Anthropic API key (only if the backend has none)</label>
     <input id="key" type="password" placeholder="sk-ant-..." autocomplete="off">
-    <p class="muted">Stored only in this browser. Pip uses it to look at your screen and answer questions.</p>
+    <p class="muted">Better: put ANTHROPIC_API_KEY in the backend's .env file. A key pasted here is stored only in this browser and used when the backend can't answer.</p>
     <button class="btn" id="resetBtn">Reset my progress</button>
     <p class="muted" id="resetNote"></p>
     <p class="muted">Pip teaches how trading works. It is not financial advice and never tells you what to buy or sell.</p>

@@ -110,3 +110,8 @@ main { padding: 14px 16px 24px; }
 .composer .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 
 .toast { position: fixed; left: 16px; right: 16px; bottom: 16px; background: var(--ink); color: var(--paper); padding: 10px 12px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.3); z-index: 5; }
+
+/* quote lookup */
+.quote .row { display: flex; gap: 6px; }
+.quote input { flex: 1; min-width: 0; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); text-transform: uppercase; }
+.chg { font-size: 13px; font-weight: 600; }
