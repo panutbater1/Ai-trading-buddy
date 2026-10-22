@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pip</title>
+<link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+<header class="top">
+  <div class="who">
+    <svg class="mini" viewBox="0 0 80 80" aria-hidden="true">
+      <line x1="40" y1="2" x2="40" y2="20" stroke="#2fbf71" stroke-width="2"/><rect x="36" y="6" width="8" height="10" rx="1.5" fill="#2fbf71"/>
+      <ellipse cx="40" cy="47" rx="27" ry="26" fill="#ffb547"/><ellipse cx="40" cy="57" rx="16" ry="11" fill="#ffd28a"/>
+      <circle cx="31" cy="41" r="7" fill="#fff"/><circle cx="50" cy="41" r="7" fill="#fff"/>
+      <circle cx="33" cy="42" r="3.4" fill="#2b1a07"/><circle cx="52" cy="42" r="3.4" fill="#2b1a07"/>
+      <path d="M35 53 q6 5 12 0" stroke="#2b1a07" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <h1>Pip</h1>
+      <p id="progressText">Your trading buddy</p>
+    </div>
+  </div>
+  <div class="bar"><span id="progressBar"></span></div>
+  <div class="actions">
+    <button class="btn go" id="tourBtn">Tour this screen</button>
+    <button class="btn" id="explainBtn">Explain mode</button>
+    <button class="btn ghost" id="hideBtn" title="Hide Pip from the page">Hide</button>
+  </div>
+  <p class="status" id="status" role="status"></p>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="guide" aria-selected="true">Guide</button>
+    <button role="tab" data-tab="chat" aria-selected="false">Ask Pip</button>
+    <button role="tab" data-tab="settings" aria-selected="false">Settings</button>
+  </nav>
+</header>
+
+<main>
+  <section id="guide" class="tab"></section>
+
+  <section id="chat" class="tab" hidden>
+    <div id="log" class="log" aria-live="polite"></div>
+    <form id="chatForm" class="composer">
+      <textarea id="chatInput" rows="2" placeholder="Ask anything, like &quot;What's a good first stock to practice with?&quot; or &quot;What does this red number mean?&quot;"></textarea>
+      <div class="row">
+        <label class="check"><input type="checkbox" id="withScreen" checked> Let Pip see my screen</label>
+        <button class="btn go" type="submit">Send</button>
+      </div>
+    </form>
+  </section>
+
+  <section id="settings" class="tab" hidden>
+    <label for="key">Anthropic API key</label>
+    <input id="key" type="password" placeholder="sk-ant-..." autocomplete="off">
+    <p class="muted">Stored only in this browser. Pip uses it to look at your screen and answer questions.</p>
+    <button class="btn" id="resetBtn">Reset my progress</button>
+    <p class="muted" id="resetNote"></p>
+    <p class="muted">Pip teaches how trading works. It is not financial advice and never tells you what to buy or sell.</p>
+  </section>
+</main>
+
+<script src="curriculum.js"></script>
+<script src="sidepanel.js"></script>
+</body>
+</html>
