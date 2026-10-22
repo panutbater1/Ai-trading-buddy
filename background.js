@@ -53,8 +53,19 @@ function parseJSON(text) {
 }
 
 async function screenshot(windowId) {
-  const url = await chrome.tabs.captureVisibleTab(windowId, { format: 'jpeg', quality: 70 });
-  return url.split(',')[1];
+  try {
+    const url = await chrome.tabs.captureVisibleTab(windowId, { format: 'jpeg', quality: 70 });
+    return url.split(',')[1];
+  } catch (e) {
+    console.warn('Screenshot failed:', e);
+    throw new Error("Pip isn't allowed to see this page yet. Press \"Tour this screen\" in the side panel and click Allow when Chrome asks. If Chrome doesn't ask, open chrome://extensions, click Details on Pip, and set Site access to \"On all sites\".");
+  }
+}
+
+// Settings "Test key" button: the smallest possible request, to check the key works.
+async function testKey() {
+  await claudeChat(await getKey(), [{ role: 'user', content: 'Reply with OK.' }], 5);
+  return 'ok';
 }
 
 async function tour(sender, { width, height }) {
@@ -118,7 +129,7 @@ ${context}`;
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, reply) => {
-  const jobs = { 'pip:analyze': tour, 'pip:describe': explain, 'pip:locate': locate, 'pip:chat': (_, m) => chat(m) };
+  const jobs = { 'pip:analyze': tour, 'pip:describe': explain, 'pip:locate': locate, 'pip:chat': (_, m) => chat(m), 'pip:testKey': () => testKey() };
   const job = jobs[msg.type]?.(sender, msg);
   if (!job) return;
   job.then(result => reply({ ok: true, result }), err => reply({ ok: false, error: String(err.message || err) }));

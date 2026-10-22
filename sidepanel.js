@@ -212,8 +212,18 @@ const TOOLS = {
 };
 
 /* ---------- talking to the page ---------- */
+// Pip needs access to the page to take screenshots. Chrome only shows the prompt
+// during a click, so this must be the first thing awaited in a click handler.
+// If access is already granted, it resolves true without asking.
+async function ensureScreenAccess() {
+  const ok = await chrome.permissions.request({ origins: ['<all_urls>'] }).catch(() => false);
+  if (!ok) $('#status').textContent = "Pip needs permission to see your screen. Click the button again and choose Allow, or open chrome://extensions → Pip → Details → Site access → On all sites.";
+  return ok;
+}
+
 async function toPage(msg) {
   $('#status').textContent = '';
+  if (msg.type !== 'pip:hide' && !(await ensureScreenAccess())) return;
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   try { await chrome.tabs.sendMessage(tab.id, msg); }
   catch { $('#status').textContent = 'Pip can\'t reach this tab. Open your trading platform and reload the page once.'; }
@@ -263,6 +273,7 @@ function renderChat() {
 $('#chatForm').addEventListener('submit', async e => {
   e.preventDefault();
   const q = $('#chatInput').value.trim(); if (!q) return;
+  if ($('#withScreen').checked) await ensureScreenAccess();
   $('#chatInput').value = '';
   chat.push({ role: 'user', content: q }, { role: 'assistant', content: 'Pip is thinking…', wait: true });
   renderChat();
@@ -288,6 +299,16 @@ $('#key').addEventListener('change', () => {
   }
   chrome.storage.local.set({ apiKey: k }, () => toast(k ? 'API key saved.' : 'API key removed.'));
 });
+$('#testKeyBtn').onclick = async () => {
+  const out = $('#keyResult');
+  const k = $('#key').value.replace(/\s+/g, '');
+  if (!k.startsWith('sk-ant-')) { out.className = 'warn'; out.textContent = 'Paste your Anthropic key first. It starts with sk-ant-.'; return; }
+  await chrome.storage.local.set({ apiKey: k });
+  out.className = 'muted'; out.textContent = 'Testing…';
+  const res = await chrome.runtime.sendMessage({ type: 'pip:testKey' });
+  out.className = res?.ok ? 'up' : 'warn';
+  out.textContent = res?.ok ? 'Your key works. Pip is ready.' : res?.error || 'Something went wrong. Try again.';
+};
 let resetArmed = false;
 $('#resetBtn').onclick = async () => {
   if (!resetArmed) { resetArmed = true; $('#resetBtn').textContent = 'Click again to erase all progress'; $('#resetNote').textContent = 'This clears your steps, journal and plan.'; return; }
