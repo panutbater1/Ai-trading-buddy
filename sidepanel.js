@@ -9,10 +9,11 @@ let S = structuredClone(DEFAULT), tourDone = false, view = { lesson: null }, cha
 
 const save = () => chrome.storage.local.set({ pip: S });
 async function load() {
-  const d = await chrome.storage.local.get(['pip', 'tourDone', 'apiKey']);
+  const d = await chrome.storage.local.get(['pip', 'tourDone', 'apiKey', 'appleColor']);
   S = { ...structuredClone(DEFAULT), ...(d.pip || {}) };
   tourDone = !!d.tourDone;
   $('#key').value = d.apiKey || '';
+  setAppleColor(d.appleColor || 'red');
 }
 
 /* ---------- progress ---------- */
@@ -307,6 +308,13 @@ async function checkBackend() {
 $('#backendCheck').onclick = checkBackend;
 document.querySelector('[data-tab="settings"]').addEventListener('click', checkBackend);
 $('#key').addEventListener('change', () => chrome.storage.local.set({ apiKey: $('#key').value.trim() }, () => toast('API key saved.')));
+function setAppleColor(c) {
+  $('#miniPip').classList.toggle('green', c === 'green');
+  document.querySelector(`[name="appleColor"][value="${c}"]`).checked = true;
+}
+document.querySelectorAll('[name="appleColor"]').forEach(r => r.addEventListener('change', () => {
+  setAppleColor(r.value); chrome.storage.local.set({ appleColor: r.value });
+}));
 let resetArmed = false;
 $('#resetBtn').onclick = async () => {
   if (!resetArmed) { resetArmed = true; $('#resetBtn').textContent = 'Click again to erase all progress'; $('#resetNote').textContent = 'This clears your steps, journal and plan.'; return; }

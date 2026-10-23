@@ -9,9 +9,9 @@
 <body>
 <header class="top">
   <div class="who">
-    <svg class="mini" viewBox="0 0 80 80" aria-hidden="true">
-      <line x1="40" y1="2" x2="40" y2="20" stroke="#2fbf71" stroke-width="2"/><rect x="36" y="6" width="8" height="10" rx="1.5" fill="#2fbf71"/>
-      <ellipse cx="40" cy="47" rx="27" ry="26" fill="#ffb547"/><ellipse cx="40" cy="57" rx="16" ry="11" fill="#ffd28a"/>
+    <svg class="mini" id="miniPip" viewBox="0 0 80 80" aria-hidden="true">
+      
+      <path d="M40 28 C34 20 13 20 13 44 C13 62 26 74 34 73 C37 72.5 43 72.5 46 73 C54 74 67 62 67 44 C67 20 46 20 40 28 Z" class="skin"/><path d="M40 29 q-1 -11 4 -17" stroke="#6b3e1f" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse class="leaf" cx="51" cy="15" rx="8" ry="4" transform="rotate(-25 51 15)"/><ellipse cx="40" cy="57" rx="16" ry="11" class="belly"/>
       <circle cx="31" cy="41" r="7" fill="#fff"/><circle cx="50" cy="41" r="7" fill="#fff"/>
       <circle cx="33" cy="42" r="3.4" fill="#2b1a07"/><circle cx="52" cy="42" r="3.4" fill="#2b1a07"/>
       <path d="M35 53 q6 5 12 0" stroke="#2b1a07" stroke-width="2.2" fill="none" stroke-linecap="round"/>
@@ -58,6 +58,11 @@
   </section>
 
   <section id="settings" class="tab" hidden>
+    <fieldset class="box color">
+      <legend>Pip's colour</legend>
+      <label class="check"><input type="radio" name="appleColor" value="red" checked> Red apple</label>
+      <label class="check"><input type="radio" name="appleColor" value="green"> Green apple</label>
+    </fieldset>
     <div class="box">
       <h3>Local backend</h3>
       <p id="backendStatus" class="muted">Checking…</p>

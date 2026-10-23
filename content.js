@@ -12,6 +12,9 @@
   * { box-sizing: border-box; }
   .layer { position: fixed; inset: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
   #pip { position: fixed; left: 24px; top: 24px; width: 72px; height: 88px; transition: left 1s linear, top 1s linear; }
+  #pip { --skin: #e8453c; --limb: #b8282e; --belly: #ff9a8f; --leaf: #2fbf71; }
+  #pip.green { --skin: #7cc242; --limb: #4f8f22; --belly: #c8ec9e; --leaf: #2e7d32; }
+  .skin { fill: var(--skin); } .limb { fill: var(--limb); } .belly { fill: var(--belly); } .leaf { fill: var(--leaf); }
   #pip svg { width: 100%; height: 100%; overflow: visible; transition: transform .18s; }
   #pip.left svg { transform: scaleX(-1); }
   .leg { transform-box: fill-box; transform-origin: 50% 0; }
@@ -44,16 +47,16 @@
   <div class="ring" hidden></div>
   <div id="pip" hidden>
     <svg viewBox="0 0 80 96"><g class="bob">
-      <line x1="40" y1="2" x2="40" y2="20" stroke="#2fbf71" stroke-width="2"/><rect x="36" y="6" width="8" height="10" rx="1.5" fill="#2fbf71"/>
-      <g class="leg l"><rect x="27" y="64" width="9" height="20" rx="4.5" fill="#e08a1e"/><ellipse cx="30" cy="86" rx="8" ry="4" fill="#2b1a07"/></g>
-      <g class="leg r"><rect x="44" y="64" width="9" height="20" rx="4.5" fill="#e08a1e"/><ellipse cx="50" cy="86" rx="8" ry="4" fill="#2b1a07"/></g>
-      <rect x="11" y="44" width="8" height="20" rx="4" fill="#e08a1e" transform="rotate(18 15 46)"/>
-      <ellipse cx="40" cy="45" rx="27" ry="26" fill="#ffb547"/><ellipse cx="40" cy="55" rx="16" ry="11" fill="#ffd28a"/>
+      
+      <g class="leg l"><rect x="27" y="64" width="9" height="20" rx="4.5" class="limb"/><ellipse cx="30" cy="86" rx="8" ry="4" fill="#2b1a07"/></g>
+      <g class="leg r"><rect x="44" y="64" width="9" height="20" rx="4.5" class="limb"/><ellipse cx="50" cy="86" rx="8" ry="4" fill="#2b1a07"/></g>
+      <rect x="11" y="44" width="8" height="20" rx="4" class="limb" transform="rotate(18 15 46)"/>
+      <path d="M40 26 C34 18 13 18 13 42 C13 60 26 72 34 71 C37 70.5 43 70.5 46 71 C54 72 67 60 67 42 C67 18 46 18 40 26 Z" class="skin"/><path d="M40 27 q-1 -11 4 -17" stroke="#6b3e1f" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse class="leaf" cx="51" cy="13" rx="8" ry="4" transform="rotate(-25 51 13)"/><ellipse cx="40" cy="55" rx="16" ry="11" class="belly"/>
       <circle cx="31" cy="39" r="7" fill="#fff"/><circle cx="50" cy="39" r="7" fill="#fff"/>
       <circle cx="33" cy="40" r="3.4" fill="#2b1a07"/><circle cx="52" cy="40" r="3.4" fill="#2b1a07"/>
-      <g class="lids"><rect x="23" y="31" width="16" height="16" rx="8" fill="#ffb547"/><rect x="42" y="31" width="16" height="16" rx="8" fill="#ffb547"/></g>
+      <g class="lids"><rect x="23" y="31" width="16" height="16" rx="8" class="skin"/><rect x="42" y="31" width="16" height="16" rx="8" class="skin"/></g>
       <path d="M35 51 q6 5 12 0" stroke="#2b1a07" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-      <g class="arm"><rect x="52" y="46" width="26" height="8" rx="4" fill="#e08a1e"/><circle cx="79" cy="50" r="5" fill="#e08a1e"/><rect x="80" y="47.5" width="9" height="4" rx="2" fill="#e08a1e"/></g>
+      <g class="arm"><rect x="52" y="46" width="26" height="8" rx="4" class="limb"/><circle cx="79" cy="50" r="5" class="limb"/><rect x="80" y="47.5" width="9" height="4" rx="2" class="limb"/></g>
     </g></svg>
   </div>
   <div class="bubble" hidden></div>
@@ -64,6 +67,11 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   let pos = { x: 24, y: 24 }, facing = 'right', steps = [], step = -1, exploring = false;
+
+  /* ---- apple colour (picked in the side panel's Settings) ---- */
+  const setColor = c => pip.classList.toggle('green', c === 'green');
+  chrome.storage.local.get('appleColor', d => setColor(d.appleColor));
+  chrome.storage.onChanged.addListener(ch => { if (ch.appleColor) setColor(ch.appleColor.newValue); });
 
   /* ---- movement ---- */
   function setFacing(f) { facing = f; pip.classList.toggle('left', f === 'left'); }
